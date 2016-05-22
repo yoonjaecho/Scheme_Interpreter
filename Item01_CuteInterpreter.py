@@ -601,6 +601,7 @@ def Test_method(input):
     print print_node(result)
 
 def run_main():
+    print 'Cute Interpreter'
     while True:
         inputString = raw_input('> ')
         if inputString is None:
