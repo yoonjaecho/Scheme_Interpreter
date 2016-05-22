@@ -321,6 +321,12 @@ class CuteInterpreter(object):
     TRUE_NODE = Node(TokenType.TRUE)
     FALSE_NODE = Node(TokenType.FALSE)
 
+    def lookupTable(self, id):
+        if id in my_dict:
+            return my_dict[id]
+        else:
+            return None
+
     def run_arith(self, arith_node):
         rhs1 = arith_node.next
         rhs2 = rhs1.next if rhs1.next is not None else None
@@ -480,7 +486,7 @@ class CuteInterpreter(object):
 
         elif func_node.type is TokenType.DEFINE :
             expr_rhs2 = self.run_expr(rhs2)
-            insertTable(rhs1.value,expr_rhs2.value)
+            insertTable(rhs1.value,expr_rhs2)
 
         else:
             return None
@@ -494,7 +500,12 @@ class CuteInterpreter(object):
             return None
 
         if root_node.type is TokenType.ID:
-            return root_node
+            dict_value = self.lookupTable(root_node.value)
+            if dict_value is None:
+                return root_node
+            else:
+                return dict_value
+
         elif root_node.type is TokenType.INT:
             return root_node
         elif root_node.type is TokenType.TRUE:
