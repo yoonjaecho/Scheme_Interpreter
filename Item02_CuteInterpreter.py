@@ -502,7 +502,8 @@ class CuteInterpreter(object):
         if root_node.type is TokenType.ID:
             dict_value = self.lookupTable(root_node.value)
             if dict_value is None:
-                return root_node
+                sys.stdout.write(root_node.value + ": undefined;\n cannot reference undefined identifier")
+                return None
             else:
                 return dict_value
 
@@ -629,7 +630,5 @@ def run_main():
         else:
             sys.stdout.write('..')
             Test_method(inputString)
-
-        print my_dict
 
 run_main()
