@@ -5,6 +5,8 @@ from string import letters, digits
 my_dict = {}
 lambda_argument = []
 lambda_parameter = []
+lambda_check = False
+
 
 class CuteType:
     INT=1
@@ -322,7 +324,7 @@ class CuteInterpreter(object):
 
     TRUE_NODE = Node(TokenType.TRUE)
     FALSE_NODE = Node(TokenType.FALSE)
-    lambda_check = False
+    #lambda_check = False
 
     def lookupTable(self, id):
         if id in my_dict:
@@ -494,7 +496,8 @@ class CuteInterpreter(object):
             insertTable(rhs1.value,expr_rhs2)
 
         elif func_node.type is TokenType.LAMBDA : #재귀하면 호출 넘버를 저장해두고 해당 넘버의 리스트에 접근하여 값가져오기 ?
-            self.lambda_check = True
+            global lambda_check
+            lambda_check = True
             #lambda_argument[0] = rhs1
             global lambda_argument
             if len(lambda_argument) is 0 :
@@ -537,7 +540,8 @@ class CuteInterpreter(object):
             return None
 
         if root_node.type is TokenType.ID:
-            if self.lambda_check is True :
+            global lambda_check
+            if lambda_check is True :
                 #print "lambda_argument : ",lambda_argument[0]
                 #print "lambda_parameter : ",lambda_parameter[0]
 
@@ -582,12 +586,15 @@ class CuteInterpreter(object):
             return l_node
         if self.lookupTable(op_code.value) is not None: #그냥 그자리에 노드를 붙여버리면 어떻게될까 ?
             list = self.lookupTable(op_code.value)
-            global lambda_parameter
+            global lambda_parameter, lambda_check
             if len(lambda_parameter) is 0 :
                 lambda_parameter.append(op_code.next) # 숫자 바인딩 노드
-            elif is not nested_set :
+            elif not lambda_check :
                 lambda_parameter.pop()
                 lambda_parameter.append(op_code.next)
+            # else :
+            #     lambda_parameter.pop()
+            #     lambda_parameter.append(op_code.next)
 
             return self.run_func(list.value)
         else:
@@ -666,12 +673,14 @@ def print_node(node):
         return "'"+print_node(node.next)
 
 def Test_method(input):
+    global lambda_check
     test_cute = CuteScanner(input)
     test_tokens=test_cute.tokenize()
     test_basic_paser = BasicPaser(test_tokens)
     node = test_basic_paser.parse_expr()
     cute_inter = CuteInterpreter()
     result = cute_inter.run_expr(node)
+    lambda_check = False
     print print_node(result)
 
 def run_main():
