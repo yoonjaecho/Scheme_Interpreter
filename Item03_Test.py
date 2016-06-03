@@ -4,7 +4,7 @@ from string import letters, digits
 
 my_dict = {}
 lambda_argument = []
-lambda_parameter = []
+lambda_actual_parameter = []
 lambda_check = False
 
 
@@ -501,12 +501,12 @@ class CuteInterpreter(object):
             #lambda_argument[0] = rhs1
             global lambda_argument
             if len(lambda_argument) is 0 :
-                lambda_argument.append(rhs1) # 변수 바인딩의 리스트 제외한 노드부분만 어펜드
+                lambda_argument.append(rhs1) # 변수 바인딩의 리스트 제외한 노드부분만 어펜드 #파라미터 저장
             else :
                 #print "pop :", lambda_argument.pop()
                 lambda_argument.append(rhs1)
-            #lambda_parameter[0] = func_node.next
-            #lambda_parameter.append()
+            #lambda_actual_parameter[0] = func_node.next
+            #lambda_actual_parameter.append()
             #lambda_dict.append(rhs1) 일단은 append는 나중에 횟수 처리할때 하고 0으로 접근하기
             expr_rhs2 = self.run_expr(rhs2)
             return expr_rhs2
@@ -524,12 +524,9 @@ class CuteInterpreter(object):
         if head_node is not None :
             if head_node.value == varName :
                 return var_node
-            else :
-                # return self.search(head_node.next, var_node.next, varName)
-
+            else:
                 return self.search(head_node.next, var_node.next, varName)
-
-        else :
+        else:
             return None
 
     def run_expr(self, root_node):
@@ -543,9 +540,9 @@ class CuteInterpreter(object):
             global lambda_check
             if lambda_check is True :
                 #print "lambda_argument : ",lambda_argument[0]
-                #print "lambda_parameter : ",lambda_parameter[0]
-
-                return self.search(lambda_argument[0].value, lambda_parameter[0], root_node.value) #여기 인덱스는 재귀해서 여러번 호출될때 사용하면될듯?
+                #print "lambda_actual_parameter : ",lambda_actual_parameter[0]
+                #x값을 여기서 처리해줌. 바인딩!
+                return self.search(lambda_argument[0].value, lambda_actual_parameter[0], root_node.value) #여기 인덱스는 재귀해서 여러번 호출될때 사용하면될듯?
             else :
                 dict_value = self.lookupTable(root_node.value)
                 if dict_value is None:
@@ -584,17 +581,17 @@ class CuteInterpreter(object):
             return self.run_arith(op_code)
         if op_code.type is TokenType.QUOTE or op_code.type is TokenType.LAMBDA:
             return l_node
-        if self.lookupTable(op_code.value) is not None: #그냥 그자리에 노드를 붙여버리면 어떻게될까 ?
+        if self.lookupTable(op_code.value) is not None: #테이블에 있으면 
             list = self.lookupTable(op_code.value)
-            global lambda_parameter, lambda_check
-            if len(lambda_parameter) is 0 :
-                lambda_parameter.append(op_code.next) # 숫자 바인딩 노드
+            global lambda_actual_parameter, lambda_check
+            if len(lambda_actual_parameter) is 0 : #아무것도 없으면 , 맨처음이면 
+                lambda_actual_parameter.append(op_code.next) # 숫자 바인딩 노드, 인자저장
             elif not lambda_check :
-                lambda_parameter.pop()
-                lambda_parameter.append(op_code.next)
+                lambda_actual_parameter.pop()
+                lambda_actual_parameter.append(op_code.next)
             # else :
-            #     lambda_parameter.pop()
-            #     lambda_parameter.append(op_code.next)
+            #     lambda_actual_parameter.pop()
+            #     lambda_actual_parameter.append(op_code.next)
 
             return self.run_func(list.value)
         else:
