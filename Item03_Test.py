@@ -495,6 +495,7 @@ class CuteInterpreter(object):
             expr_rhs2 = self.run_expr(rhs2)
             insertTable(rhs1.value,expr_rhs2)
 
+
         elif func_node.type is TokenType.LAMBDA : #재귀하면 호출 넘버를 저장해두고 해당 넘버의 리스트에 접근하여 값가져오기 ?
             global lambda_check
             lambda_check = True
@@ -503,12 +504,16 @@ class CuteInterpreter(object):
             if len(lambda_argument) is 0 :
                 lambda_argument.append(rhs1) # 변수 바인딩의 리스트 제외한 노드부분만 어펜드 #파라미터 저장
             else :
-                #print "pop :", lambda_argument.pop()
                 lambda_argument.append(rhs1)
-            #lambda_actual_parameter[0] = func_node.next
-            #lambda_actual_parameter.append()
-            #lambda_dict.append(rhs1) 일단은 append는 나중에 횟수 처리할때 하고 0으로 접근하기
-            expr_rhs2 = self.run_expr(rhs2)
+            while 1:
+                expr_rhs2 = self.run_expr(rhs2)
+                if rhs2.next is None:
+                    break
+                else:
+                    rhs2 = rhs2.next
+
+           # if rhs2.next is not None :
+
             return expr_rhs2
 
         else:
@@ -682,12 +687,25 @@ def Test_method(input):
 
 def run_main():
     print 'Cute Interpreter'
-    while True:
-        inputString = raw_input('> ')
-        if inputString is None:
-            break
-        else:
-            sys.stdout.write('..')
-            Test_method(inputString)
+
+#    while True:
+ #       inputString = raw_input('> ')
+  #      if inputString is None:
+   #         break
+    #    else:
+     #       sys.stdout.write('..')
+      #      Test_method(inputString)
+
+#    Test_method("( define plus1 ( lambda ( x ) ( + x 1 ) ) )")
+ #   Test_method("( plus1 3 )")
+  #  Test_method("( define plus2 ( lambda ( x ) ( + ( plus1 x ) 1 ) ) )")
+   # Test_method("( plus2 9 )")
+    Test_method("( define cube ( lambda ( n ) ( define sqrt ( lambda ( n ) ( * n n ) ) ) ( * ( sqrt n ) n ) ) )")
+    Test_method("( cube 5 )")
+    Test_method("( define quadra ( lambda ( n ) ( define cube ( lambda ( n ) ( define sqrt ( lambda ( n ) ( * n n ) ) ) ( * ( sqrt n ) n ) ) ) ( * ( cube n ) n ) ) )")
+    Test_method("( quadra 5 )")
+    print my_dict
+#    Test_method("( define lastitem ( lambda ( ls ) ( cond ( ( null? ( cdr ls ) ) ( car ls ) ) ( #T ( lastitem ( cdr ls ) ) ) ) ) )")
+#    Test_method("( lastitem ' ( 1 2 3 ) )")
 
 run_main()
