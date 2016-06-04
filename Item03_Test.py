@@ -385,6 +385,7 @@ class CuteInterpreter(object):
             "Quote list에서 quote에 연결되어 있는 list노드의 value를 꺼내줌"
             if not is_quote_list(node):
                 return node
+
             return node.value.next.value
 
         def insertTable(id,value) :
@@ -393,26 +394,40 @@ class CuteInterpreter(object):
         def list_is_null(node):
             "입력받은 node가 null list인지 확인함"
             node = pop_node_from_quote_list(node)
-            if node is None:return True
+            if node is None:
+                print "이제돌지?"
+                return True
             return False
 
        	if func_node.type is TokenType.CAR:
             rhs1 = self.run_expr(rhs1)
+            print rhs1,"dsafasdf"
             if not is_quote_list(rhs1):
                 print ("car error!")
-            result = pop_node_from_quote_list(rhs1)
+
+            result = pop_node_from_quote_list(rhs1) #value
+            print result,"CAR안에선 "
+          #  print lambda_actual_parameter,",",result.value
             if result.type is not TokenType.LIST:
                 return result
             return create_quote_node(result)
 
 
         elif func_node.type is TokenType.CDR:
+            print rhs1,"rhs1"
             rhs1 = self.run_expr(rhs1)
+            print rhs1,"CDR입니다"
             if not is_quote_list(rhs1):
                 print("cdr error!")
-
             result = pop_node_from_quote_list(rhs1)
             q_node = Node(TokenType.LIST, result.next)
+           # print  lambda_actual_parameter[0], "lambda_actual_parameter"
+            print q_node,"CDR에서는"
+          #  temp = create_quote_node(q_node)
+          #  print temp,"여기는 temp를 넣음"
+          #  if lambda_check:
+          #      lambda_actual_parameter[0] = temp
+          #      print lambda_actual_parameter[0]
             return create_quote_node(q_node)
 
 
@@ -447,7 +462,12 @@ class CuteInterpreter(object):
 
 
         elif func_node.type is TokenType.NULL_Q:
-            if list_is_null(rhs1): return self.TRUE_NODE
+            #print self.run_expr(rhs1) ,"이거바바바바"
+            if list_is_null(self.run_expr(rhs1)):
+                print "none"
+
+                print lambda_actual_parameter[0],"반환직전"
+                return self.TRUE_NODE
             return self.FALSE_NODE
 
         elif func_node.type is TokenType.GT:
@@ -497,21 +517,22 @@ class CuteInterpreter(object):
 
 
         elif func_node.type is TokenType.LAMBDA : #재귀하면 호출 넘버를 저장해두고 해당 넘버의 리스트에 접근하여 값가져오기 ?
+            print rhs1,"Lambda 안에서"
             global lambda_check
             lambda_check = True
-            #lambda_argument[0] = rhs1
             global lambda_argument
+            print rhs2,"Lambda 안에서"
+
             if len(lambda_argument) is 0 :
                 lambda_argument.append(rhs1) # 변수 바인딩의 리스트 제외한 노드부분만 어펜드 #파라미터 저장
-            else :
-                lambda_argument.append(rhs1)
+
             while 1:
                 expr_rhs2 = self.run_expr(rhs2)
                 if rhs2.next is None:
                     break
                 else:
                     rhs2 = rhs2.next
-
+            #####여기================여기 rhs2가 계속 돌아
            # if rhs2.next is not None :
 
             return expr_rhs2
@@ -585,19 +606,35 @@ class CuteInterpreter(object):
                  TokenType.DIV]:
             return self.run_arith(op_code)
         if op_code.type is TokenType.QUOTE or op_code.type is TokenType.LAMBDA:
+            print "여기직전에돌지?"
             return l_node
-        if self.lookupTable(op_code.value) is not None: #테이블에 있으면 
+        if self.lookupTable(op_code.value) is not None: #테이블에 있으면
             list = self.lookupTable(op_code.value)
+            print list,"list입니다"
+            print op_code.value,"opcode value입니다"
             global lambda_actual_parameter, lambda_check
-            if len(lambda_actual_parameter) is 0 : #아무것도 없으면 , 맨처음이면 
+            if len(lambda_actual_parameter) is 0 : #아무것도 없으면 , 맨처음이면
+                print op_code.next ,"이 값이 테이블에 저장됨1."
                 lambda_actual_parameter.append(op_code.next) # 숫자 바인딩 노드, 인자저장
+                #-------------테이블에서 list에 값을 가져옴 . 그래서 계속 lambda를 반복해서 돌아 그래서 이를 해결
+            else:
+                print "여기를 돌아야하는건데왜왜ㅗ애"
+                save =self.run_expr(op_code.next)
+                print save ,"이 값이 테이블에 저장됨2."
+                lambda_actual_parameter.append(save)
+                if lambda_check:
+                    lambda_actual_parameter[0] = save
+                #-------------
+            """
             elif not lambda_check :
                 lambda_actual_parameter.pop()
+                print "계속 여기돌겟나?"
                 lambda_actual_parameter.append(op_code.next)
+                """
             # else :
             #     lambda_actual_parameter.pop()
             #     lambda_actual_parameter.append(op_code.next)
-
+            print list.value,"list의 value입니다"
             return self.run_func(list.value)
         else:
             print "application: not a procedure;"
@@ -700,12 +737,12 @@ def run_main():
  #   Test_method("( plus1 3 )")
   #  Test_method("( define plus2 ( lambda ( x ) ( + ( plus1 x ) 1 ) ) )")
    # Test_method("( plus2 9 )")
-    Test_method("( define cube ( lambda ( n ) ( define sqrt ( lambda ( n ) ( * n n ) ) ) ( * ( sqrt n ) n ) ) )")
-    Test_method("( cube 5 )")
-    Test_method("( define quadra ( lambda ( n ) ( define cube ( lambda ( n ) ( define sqrt ( lambda ( n ) ( * n n ) ) ) ( * ( sqrt n ) n ) ) ) ( * ( cube n ) n ) ) )")
-    Test_method("( quadra 5 )")
+ #   Test_method("( define cube ( lambda ( n ) ( define sqrt ( lambda ( n ) ( * n n ) ) ) ( * ( sqrt n ) n ) ) )")
+  #  Test_method("( cube 5 )")
+ #   Test_method("( define quadra ( lambda ( n ) ( define cube ( lambda ( n ) ( define sqrt ( lambda ( n ) ( * n n ) ) ) ( * ( sqrt n ) n ) ) ) ( * ( cube n ) n ) ) )")
+ #   Test_method("( quadra 5 )")
     print my_dict
-#    Test_method("( define lastitem ( lambda ( ls ) ( cond ( ( null? ( cdr ls ) ) ( car ls ) ) ( #T ( lastitem ( cdr ls ) ) ) ) ) )")
-#    Test_method("( lastitem ' ( 1 2 3 ) )")
+    Test_method("( define lastitem ( lambda ( ls ) ( cond ( ( null? ( cdr ls ) ) ( car ls ) ) ( #T ( lastitem ( cdr ls ) ) ) ) ) )")
+    Test_method("( lastitem ' ( 1 2 3 ) )")
 
 run_main()
