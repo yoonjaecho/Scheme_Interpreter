@@ -581,8 +581,8 @@ class CuteInterpreter(object):
             return self.run_arith(op_code)
         if op_code.type is TokenType.QUOTE or op_code.type is TokenType.LAMBDA:
             return l_node
-        if self.lookupTable(op_code.value) is not None: #테이블에 있으면
-            list = self.lookupTable(op_code.value)
+        getFunction = self.lookupTable(op_code.value)
+        if getFunction is not None: #테이블에 있으면
             global lambda_actual_parameter, lambda_check
             if len(lambda_actual_parameter) is 0 : #아무것도 없으면 , 맨처음이면
                 lambda_actual_parameter.append(op_code.next) # 숫자 바인딩 노드, 인자저장
@@ -591,7 +591,7 @@ class CuteInterpreter(object):
                 save =self.run_expr(op_code.next)
                 lambda_actual_parameter.append(save)
 
-            return self.run_func(list.value)
+            return self.run_func(getFunction.value)
         else:
             print "application: not a procedure;"
             print "expected a procedure that can be applied to arguments"
