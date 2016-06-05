@@ -567,6 +567,7 @@ class CuteInterpreter(object):
         """
         :type l_node:Node
         """
+        global lambda_actual_parameter, lambda_check
         op_code = l_node.value
         if op_code is None:
             return l_node
@@ -581,12 +582,14 @@ class CuteInterpreter(object):
             return self.run_arith(op_code)
         if op_code.type is TokenType.QUOTE or op_code.type is TokenType.LAMBDA:
             return l_node
+        if op_code.type is TokenType.LIST :
+            lambda_actual_parameter.append(op_code.next)
+            return self.run_func(op_code.value)
 
         getFunction = self.lookupTable(op_code.value)
 
         # Does the function exist on table?
         if getFunction is not None:
-            global lambda_actual_parameter, lambda_check
             # If nothing on table
             if len(lambda_actual_parameter) is 0 :
                 lambda_actual_parameter.append(op_code.next)
@@ -686,18 +689,17 @@ def Test_method(input):
 def run_main():
     print 'Cute Interpreter'
 
-    # while True:
-    #    inputString = raw_input('> ')
-    #    if inputString is None:
-    #        break
-    #    else:
-    #        sys.stdout.write('..')
-    #        Test_method(inputString)
+    while True:
+       inputString = raw_input('> ')
+       if inputString is None:
+           break
+       else:
+           sys.stdout.write('..')
+           Test_method(inputString)
 
-    Test_method("( ( lambda ( x ) ( + x 1 ) ) 2 )")
-
-    #  Test_method("( define plus1 ( lambda ( x ) ( + x 1 ) ) )")
-    #  Test_method("( plus1 3 )")
+    # Test_method("( ( lambda ( x ) ( + x 1 ) ) 100 )")
+    # Test_method("( define plus1 ( lambda ( x ) ( + x 1 ) ) )")
+    # Test_method("( plus1 3 )")
     #  Test_method("( define plus2 ( lambda ( x ) ( + ( plus1 x ) 1 ) ) )")
     #  Test_method("( plus2 9 )")
     #  Test_method("( define cube ( lambda ( n ) ( define sqrt ( lambda ( n ) ( * n n ) ) ) ( * ( sqrt n ) n ) ) )")
