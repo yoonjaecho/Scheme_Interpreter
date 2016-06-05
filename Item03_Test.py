@@ -542,14 +542,16 @@ class CuteInterpreter(object):
 
             else :
                 dict_value = self.lookupTable(root_node.value)
+                print my_dict
                 if dict_value is None:
                     sys.stdout.write(root_node.value + ": undefined;\n cannot reference undefined identifier")
                     return None
                 else:
-                    if dict_value.value.type is TokenType.LAMBDA :
+                    if dict_value.type is TokenType.INT :
+                        return dict_value
+                    elif dict_value.value.type is TokenType.LAMBDA :
                         sys.stdout.write( "<#procedure:"+root_node.value+">" )
                         return
-                    return dict_value
 
         elif root_node.type is TokenType.INT:
             return root_node
