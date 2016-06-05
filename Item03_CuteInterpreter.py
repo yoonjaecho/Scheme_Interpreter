@@ -502,8 +502,8 @@ class CuteInterpreter(object):
             lambda_check = True
             global lambda_argument
 
-            if len(lambda_argument) is 0 :
-                lambda_argument.append(rhs1) # ���� ���ε��� ����Ʈ ������ ���κи� ����� #�Ķ���� ����
+            #if len(lambda_argument) is 0 :
+            lambda_argument.append(rhs1) # ���� ���ε��� ����Ʈ ������ ���κи� ����� #�Ķ���� ����
 
             while 1:
                 expr_rhs2 = self.run_expr(rhs2)
@@ -536,8 +536,13 @@ class CuteInterpreter(object):
         if root_node.type is TokenType.ID:
             global lambda_check
             if lambda_check is True :
-
-                return self.search(lambda_argument[0].value, lambda_actual_parameter[lambda_actual_parameter.__len__()-1], root_node.value)
+                i = 0
+                while True :
+                    flag = self.search(lambda_argument[i].value, lambda_actual_parameter[i], root_node.value)
+                    if flag is not None :
+                        return flag
+                    else :
+                        i += 1
 
             else :
                 dict_value = self.lookupTable(root_node.value)
@@ -596,7 +601,7 @@ class CuteInterpreter(object):
 
             else:
                 save =self.run_expr(op_code.next)
-                lambda_actual_parameter.append(save)
+                lambda_actual_parameter[lambda_actual_parameter.__len__()-1] =save
 
             return self.run_func(getFunction.value)
         else:
@@ -689,31 +694,32 @@ def Test_method(input):
 def run_main():
     print 'Cute Interpreter'
 
-    while True:
-       inputString = raw_input('> ')
-       if inputString is None:
-           break
-       else:
-           sys.stdout.write('..')
-           Test_method(inputString)
+    # while True:
+    #    inputString = raw_input('> ')
+    #    if inputString is None:
+    #        break
+    #    else:
+    #        sys.stdout.write('..')
+    #        Test_method(inputString)
 
-    # Test_method("( ( lambda ( x ) ( + x 1 ) ) 100 )")
-    # Test_method("( define plus1 ( lambda ( x ) ( + x 1 ) ) )")
-    # Test_method("( plus1 3 )")
-    #  Test_method("( define plus2 ( lambda ( x ) ( + ( plus1 x ) 1 ) ) )")
-    #  Test_method("( plus2 9 )")
-    #  Test_method("( define cube ( lambda ( n ) ( define sqrt ( lambda ( n ) ( * n n ) ) ) ( * ( sqrt n ) n ) ) )")
-    #  Test_method("( define foo ( lambda ( x y ) ( define goo ( lambda ( x ) ( * 2 x ) ) ) ( * ( goo x ) y ) ) ) ")
-    #  Test_method("( cube 5 )")
-    #  Test_method("( foo 5 3 )")
-    #  Test_method("( define quadra ( lambda ( n ) ( define cube ( lambda ( n ) ( define sqrt ( lambda ( n ) ( * n n ) ) ) ( * ( sqrt n ) n ) ) ) ( * ( cube n ) n ) ) )")
-    #  Test_method("( quadra 5 )")
-    #  Test_method("( define lastitem ( lambda ( ls ) ( cond ( ( null? ( cdr ls ) ) ( car ls ) ) ( #T ( lastitem ( cdr ls ) ) ) ) ) )")
-    #  Test_method("( lastitem ' ( 1 2 3 ) )")
-    #  Test_method("lastitem")
-    #  Test_method("cube")
-    #  Test_method("( define length ( lambda ( ls ) ( cond ( ( null? ls ) 0 ) ( #T ( + 1 ( length ( cdr ls ) ) ) ) ) ) )")
-    #  Test_method("( length ' ( 1 2 3 ) )")
+    Test_method("( ( lambda ( x ) ( + x 1 ) ) 100 )")
+    Test_method("( ( lambda ( x ) ( + x ( ( lambda ( y ) ( + y 1 ) ) 1 ) ) ) 1 )")
+    Test_method("( define plus1 ( lambda ( x ) ( + x 1 ) ) )")
+    Test_method("( plus1 3 )")
+    Test_method("( define plus2 ( lambda ( x ) ( + ( plus1 x ) 1 ) ) )")
+    Test_method("( plus2 9 )")
+    Test_method("( define cube ( lambda ( n ) ( define sqrt ( lambda ( n ) ( * n n ) ) ) ( * ( sqrt n ) n ) ) )")
+    Test_method("( define foo ( lambda ( x y ) ( define goo ( lambda ( x ) ( * 2 x ) ) ) ( * ( goo x ) y ) ) ) ")
+    Test_method("( cube 5 )")
+    Test_method("( foo 5 3 )")
+    Test_method("( define quadra ( lambda ( n ) ( define cube ( lambda ( n ) ( define sqrt ( lambda ( n ) ( * n n ) ) ) ( * ( sqrt n ) n ) ) ) ( * ( cube n ) n ) ) )")
+    Test_method("( quadra 5 )")
+    Test_method("( define lastitem ( lambda ( ls ) ( cond ( ( null? ( cdr ls ) ) ( car ls ) ) ( #T ( lastitem ( cdr ls ) ) ) ) ) )")
+    Test_method("( lastitem ' ( 1 2 3 ) )")
+    Test_method("lastitem")
+    Test_method("cube")
+    Test_method("( define length ( lambda ( ls ) ( cond ( ( null? ls ) 0 ) ( #T ( + 1 ( length ( cdr ls ) ) ) ) ) ) )")
+    Test_method("( length ' ( 1 2 3 4 5 ) )")
 
 run_main()
 
