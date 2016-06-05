@@ -339,8 +339,6 @@ class CuteInterpreter(object):
         right = self.run_expr(rhs2)
         result = Node(TokenType.INT)
 
-        print "left : ", left
-        print "right : ", right
         if arith_node.type is TokenType.PLUS:
            result.value = int(left.value) + int(right.value)
         elif arith_node.type is TokenType.MINUS:
@@ -403,7 +401,6 @@ class CuteInterpreter(object):
                 print ("car error!")
 
             result = pop_node_from_quote_list(rhs1) #value
-          #  print lambda_actual_parameter,",",result.value
             if result.type is not TokenType.LIST:
                 return result
             return create_quote_node(result)
@@ -522,12 +519,6 @@ class CuteInterpreter(object):
             return None
 
     def search(self, head_node, var_node, varName) : # search에서 True 셋 해주고 False 해주는 시점이 문제
-        #print head_node
-        #print var_node
-        #print "search 옴 ?"
-        #print "VarName : ", varName
-        #self.lambda_check = False
-        # print "varName : ", varName
         if head_node is not None :
             if head_node.value == varName :
                 return var_node
@@ -546,12 +537,8 @@ class CuteInterpreter(object):
         if root_node.type is TokenType.ID:
             global lambda_check
             if lambda_check is True :
-                #print "lambda_argument : ",lambda_argument[0]
-                #print "lambda_actual_parameter : ",lambda_actual_parameter[0]
-                #x값을 여기서 처리해줌. 바인딩!
 
                 return self.search(lambda_argument[0].value, lambda_actual_parameter[lambda_actual_parameter.__len__()-1], root_node.value) #여기 인덱스는 재귀해서 여러번 호출될때 사용하면될듯?
-              #   return self.search(lambda_argument[0].value, lambda_actual_parameter[0], root_node.value) #여기 인덱스는 재귀해서 여러번 호출될때 사용하면될듯?
 
             else :
                 dict_value = self.lookupTable(root_node.value)
@@ -559,6 +546,9 @@ class CuteInterpreter(object):
                     sys.stdout.write(root_node.value + ": undefined;\n cannot reference undefined identifier")
                     return None
                 else:
+                    if dict_value.value.type is TokenType.LAMBDA :
+                        sys.stdout.write( "<#procedure:"+root_node.value+">" )
+                        return
                     return dict_value
 
         elif root_node.type is TokenType.INT:
@@ -578,7 +568,6 @@ class CuteInterpreter(object):
         :type l_node:Node
         """
         op_code = l_node.value
-        print op_code,"op코드"
         if op_code is None:
             return l_node
         if op_code.type in \
@@ -594,31 +583,14 @@ class CuteInterpreter(object):
             return l_node
         if self.lookupTable(op_code.value) is not None: #테이블에 있으면
             list = self.lookupTable(op_code.value)
-            print list,"list입니당"
             global lambda_actual_parameter, lambda_check
             if len(lambda_actual_parameter) is 0 : #아무것도 없으면 , 맨처음이면
                 lambda_actual_parameter.append(op_code.next) # 숫자 바인딩 노드, 인자저장
 
-                #-------------테이블에서 list에 값을 가져옴 . 그래서 계속 lambda를 반복해서 돌아 그래서 이를 해결
-        #    else:
-         #       save =self.run_expr(op_code.next)
-          #      lambda_actual_parameter.append(save)
-
-           #     if lambda_check:
-            #        lambda_actual_parameter[0] = save
-                #-------------
-
-            elif not lambda_check :
-                lambda_actual_parameter.pop()
-                print "계속 여기돌겟나?"
-                lambda_actual_parameter.append(op_code.next)
             else:
                 save =self.run_expr(op_code.next)
                 lambda_actual_parameter.append(save)
 
-            # else :
-            #     lambda_actual_parameter.pop()
-            #     lambda_actual_parameter.append(op_code.next)
             return self.run_func(list.value)
         else:
             print "application: not a procedure;"
@@ -696,7 +668,7 @@ def print_node(node):
         return "'"+print_node(node.next)
 
 def Test_method(input):
-    global lambda_check
+    global lambda_check, lambda_actual_parameter, lambda_argument
     test_cute = CuteScanner(input)
     test_tokens=test_cute.tokenize()
     test_basic_paser = BasicPaser(test_tokens)
@@ -704,29 +676,36 @@ def Test_method(input):
     cute_inter = CuteInterpreter()
     result = cute_inter.run_expr(node)
     lambda_check = False
+    lambda_actual_parameter = []
+    lambda_argument = []
     print print_node(result)
 
 def run_main():
     print 'Cute Interpreter'
 
-#    while True:
- #       inputString = raw_input('> ')
-  #      if inputString is None:
-   #         break
-    #    else:
-     #       sys.stdout.write('..')
-      #      Test_method(inputString)
+    while True:
+       inputString = raw_input('> ')
+       if inputString is None:
+           break
+       else:
+           sys.stdout.write('..')
+           Test_method(inputString)
 
   #  Test_method("( define plus1 ( lambda ( x ) ( + x 1 ) ) )")
   #  Test_method("( plus1 3 )")
   #  Test_method("( define plus2 ( lambda ( x ) ( + ( plus1 x ) 1 ) ) )")
   #  Test_method("( plus2 9 )")
-    Test_method("( define cube ( lambda ( n ) ( define sqrt ( lambda ( n ) ( * n n ) ) ) ( * ( sqrt n ) n ) ) )")
-    Test_method("( cube 5 )")
+  #  Test_method("( define cube ( lambda ( n ) ( define sqrt ( lambda ( n ) ( * n n ) ) ) ( * ( sqrt n ) n ) ) )")
+  #  Test_method("( define foo ( lambda ( x y ) ( define goo ( lambda ( x ) ( * 2 x ) ) ) ( * ( goo x ) y ) ) ) ")
+  #   Test_method("( cube 5 )")
+  #  Test_method("( foo 5 3 )")
   #  Test_method("( define quadra ( lambda ( n ) ( define cube ( lambda ( n ) ( define sqrt ( lambda ( n ) ( * n n ) ) ) ( * ( sqrt n ) n ) ) ) ( * ( cube n ) n ) ) )")
   #  Test_method("( quadra 5 )")
   #  print my_dict
-    Test_method("( define lastitem ( lambda ( ls ) ( cond ( ( null? ( cdr ls ) ) ( car ls ) ) ( #T ( lastitem ( cdr ls ) ) ) ) ) )")
-    Test_method("( lastitem ' ( 1 2 3 ) )")
-
+#    Test_method("( define lastitem ( lambda ( ls ) ( cond ( ( null? ( cdr ls ) ) ( car ls ) ) ( #T ( lastitem ( cdr ls ) ) ) ) ) )")
+#     Test_method("( lastitem ' ( 1 2 3 ) )")
+    # Test_method("lastitem")
+    # Test_method("cube")
+    # Test_method("( define length ( lambda ( ls ) ( cond ( ( null? ls ) 0 ) ( #T ( + 1 ( length ( cdr ls ) ) ) ) ) ) )")
+    # Test_method("( length ' ( 1 2 3 ) )")
 run_main()
