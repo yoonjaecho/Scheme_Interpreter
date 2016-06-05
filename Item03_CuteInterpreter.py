@@ -356,10 +356,10 @@ class CuteInterpreter(object):
 
         def create_quote_node(node, list_flag = False):
             """
-            "Quote ³ëµå¸¦ »ý¼ºÇÑ µÚ, node¸¦ next·Î ÇÏ¿© ¹ÝÈ¯"
-            "list_flag°¡ TrueÀÏ °æ¿ì, list node¸¦ »ý¼ºÇÑ µÚ, listÀÇ value¸¦ ÀÔ·Â¹ÞÀº node·Î ¿¬°áÇÏ°í"
-            "QuoteÀÇ next¸¦ ¿©±â¼­ »ý»óÇÑ list·Î ¿¬°áÇÔ"
-            "ÃÖÁ¾ ¸®ÅÏÀº ¿©±â¼­ »ý¼ºÇÑ quote³ëµå¸¦ value·Î °®´Â List"
+            "Quote ï¿½ï¿½å¸¦ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½, nodeï¿½ï¿½ nextï¿½ï¿½ ï¿½Ï¿ï¿½ ï¿½ï¿½È¯"
+            "list_flagï¿½ï¿½ Trueï¿½ï¿½ ï¿½ï¿½ï¿½, list nodeï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½, listï¿½ï¿½ valueï¿½ï¿½ ï¿½Ô·Â¹ï¿½ï¿½ï¿½ nodeï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï°ï¿½"
+            "Quoteï¿½ï¿½ nextï¿½ï¿½ ï¿½ï¿½ï¿½â¼­ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ listï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½"
+            "ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½â¼­ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ quoteï¿½ï¿½å¸¦ valueï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ List"
             """
             q_node = Node(TokenType.QUOTE)
             if list_flag:
@@ -371,7 +371,7 @@ class CuteInterpreter(object):
             return l_node
 
         def is_quote_list(node):
-            "QuoteÀÇ next°¡ listÀÎÁö È®ÀÎ"
+            "Quoteï¿½ï¿½ nextï¿½ï¿½ listï¿½ï¿½ï¿½ï¿½ È®ï¿½ï¿½"
             if node.type is TokenType.LIST:
                 if node.value.type is TokenType.QUOTE:
                     if node.value.next.type is TokenType.LIST:
@@ -379,7 +379,7 @@ class CuteInterpreter(object):
             return False
 
         def pop_node_from_quote_list(node):
-            "Quote list¿¡¼­ quote¿¡ ¿¬°áµÇ¾î ÀÖ´Â list³ëµåÀÇ value¸¦ ²¨³»ÁÜ"
+            "Quote listï¿½ï¿½ï¿½ï¿½ quoteï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ç¾ï¿½ ï¿½Ö´ï¿½ listï¿½ï¿½ï¿½ï¿½ï¿½ valueï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½"
             if not is_quote_list(node):
                 return node
 
@@ -389,7 +389,7 @@ class CuteInterpreter(object):
             my_dict[id] = value
 
         def list_is_null(node):
-            "ÀÔ·Â¹ÞÀº node°¡ null listÀÎÁö È®ÀÎÇÔ"
+            "ï¿½Ô·Â¹ï¿½ï¿½ï¿½ nodeï¿½ï¿½ null listï¿½ï¿½ï¿½ï¿½ È®ï¿½ï¿½ï¿½ï¿½"
             node = pop_node_from_quote_list(node)
             if node is None:
                 return True
@@ -503,7 +503,7 @@ class CuteInterpreter(object):
             global lambda_argument
 
             if len(lambda_argument) is 0 :
-                lambda_argument.append(rhs1) # º¯¼ö ¹ÙÀÎµùÀÇ ¸®½ºÆ® Á¦¿ÜÇÑ ³ëµåºÎºÐ¸¸ ¾îÆæµå #ÆÄ¶ó¹ÌÅÍ ÀúÀå
+                lambda_argument.append(rhs1) # ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Îµï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ÎºÐ¸ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ #ï¿½Ä¶ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 
             while 1:
                 expr_rhs2 = self.run_expr(rhs2)
@@ -686,30 +686,32 @@ def Test_method(input):
 def run_main():
     print 'Cute Interpreter'
 
-    while True:
-       inputString = raw_input('> ')
-       if inputString is None:
-           break
-       else:
-           sys.stdout.write('..')
-           Test_method(inputString)
+    # while True:
+    #    inputString = raw_input('> ')
+    #    if inputString is None:
+    #        break
+    #    else:
+    #        sys.stdout.write('..')
+    #        Test_method(inputString)
 
-  #  Test_method("( define plus1 ( lambda ( x ) ( + x 1 ) ) )")
-  #  Test_method("( plus1 3 )")
-  #  Test_method("( define plus2 ( lambda ( x ) ( + ( plus1 x ) 1 ) ) )")
-  #  Test_method("( plus2 9 )")
-  #  Test_method("( define cube ( lambda ( n ) ( define sqrt ( lambda ( n ) ( * n n ) ) ) ( * ( sqrt n ) n ) ) )")
-  #  Test_method("( define foo ( lambda ( x y ) ( define goo ( lambda ( x ) ( * 2 x ) ) ) ( * ( goo x ) y ) ) ) ")
-  #  Test_method("( cube 5 )")
-  #  Test_method("( foo 5 3 )")
-  #  Test_method("( define quadra ( lambda ( n ) ( define cube ( lambda ( n ) ( define sqrt ( lambda ( n ) ( * n n ) ) ) ( * ( sqrt n ) n ) ) ) ( * ( cube n ) n ) ) )")
-  #  Test_method("( quadra 5 )")
-  #  Test_method("( define lastitem ( lambda ( ls ) ( cond ( ( null? ( cdr ls ) ) ( car ls ) ) ( #T ( lastitem ( cdr ls ) ) ) ) ) )")
-  #  Test_method("( lastitem ' ( 1 2 3 ) )")
-  #  Test_method("lastitem")
-  #  Test_method("cube")
-  #  Test_method("( define length ( lambda ( ls ) ( cond ( ( null? ls ) 0 ) ( #T ( + 1 ( length ( cdr ls ) ) ) ) ) ) )")
-  #  Test_method("( length ' ( 1 2 3 ) )")
+    Test_method("( ( lambda ( x ) ( + x 1 ) ) 2 )")
+
+    #  Test_method("( define plus1 ( lambda ( x ) ( + x 1 ) ) )")
+    #  Test_method("( plus1 3 )")
+    #  Test_method("( define plus2 ( lambda ( x ) ( + ( plus1 x ) 1 ) ) )")
+    #  Test_method("( plus2 9 )")
+    #  Test_method("( define cube ( lambda ( n ) ( define sqrt ( lambda ( n ) ( * n n ) ) ) ( * ( sqrt n ) n ) ) )")
+    #  Test_method("( define foo ( lambda ( x y ) ( define goo ( lambda ( x ) ( * 2 x ) ) ) ( * ( goo x ) y ) ) ) ")
+    #  Test_method("( cube 5 )")
+    #  Test_method("( foo 5 3 )")
+    #  Test_method("( define quadra ( lambda ( n ) ( define cube ( lambda ( n ) ( define sqrt ( lambda ( n ) ( * n n ) ) ) ( * ( sqrt n ) n ) ) ) ( * ( cube n ) n ) ) )")
+    #  Test_method("( quadra 5 )")
+    #  Test_method("( define lastitem ( lambda ( ls ) ( cond ( ( null? ( cdr ls ) ) ( car ls ) ) ( #T ( lastitem ( cdr ls ) ) ) ) ) )")
+    #  Test_method("( lastitem ' ( 1 2 3 ) )")
+    #  Test_method("lastitem")
+    #  Test_method("cube")
+    #  Test_method("( define length ( lambda ( ls ) ( cond ( ( null? ls ) 0 ) ( #T ( + 1 ( length ( cdr ls ) ) ) ) ) ) )")
+    #  Test_method("( length ' ( 1 2 3 ) )")
 
 run_main()
 
