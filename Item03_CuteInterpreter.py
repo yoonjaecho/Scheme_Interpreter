@@ -3,6 +3,9 @@ import sys
 from string import letters, digits
 
 my_dict = {}
+lambda_argument = []
+lambda_actual_parameter = []
+lambda_check = False
 
 class CuteType:
     INT=1
@@ -320,6 +323,7 @@ class CuteInterpreter(object):
 
     TRUE_NODE = Node(TokenType.TRUE)
     FALSE_NODE = Node(TokenType.FALSE)
+    #lambda_check = False
 
     def lookupTable(self, id):
         if id in my_dict:
@@ -352,10 +356,10 @@ class CuteInterpreter(object):
 
         def create_quote_node(node, list_flag = False):
             """
-            "Quote ë…¸ë“œë¥¼ ìƒì„±í•œ ë’¤, nodeë¥¼ nextë¡œ í•˜ì—¬ ë°˜í™˜"
-            "list_flagê°€ Trueì¼ ê²½ìš°, list nodeë¥¼ ìƒì„±í•œ ë’¤, listì˜ valueë¥¼ ì…ë ¥ë°›ì€ nodeë¡œ ì—°ê²°í•˜ê³ "
-            "Quoteì˜ nextë¥¼ ì—¬ê¸°ì„œ ìƒìƒí•œ listë¡œ ì—°ê²°í•¨"
-            "ìµœì¢… ë¦¬í„´ì€ ì—¬ê¸°ì„œ ìƒì„±í•œ quoteë…¸ë“œë¥¼ valueë¡œ ê°–ëŠ” List"
+            "Quote ³ëµå¸¦ »ı¼ºÇÑ µÚ, node¸¦ next·Î ÇÏ¿© ¹İÈ¯"
+            "list_flag°¡ TrueÀÏ °æ¿ì, list node¸¦ »ı¼ºÇÑ µÚ, listÀÇ value¸¦ ÀÔ·Â¹ŞÀº node·Î ¿¬°áÇÏ°í"
+            "QuoteÀÇ next¸¦ ¿©±â¼­ »ı»óÇÑ list·Î ¿¬°áÇÔ"
+            "ÃÖÁ¾ ¸®ÅÏÀº ¿©±â¼­ »ı¼ºÇÑ quote³ëµå¸¦ value·Î °®´Â List"
             """
             q_node = Node(TokenType.QUOTE)
             if list_flag:
@@ -367,7 +371,7 @@ class CuteInterpreter(object):
             return l_node
 
         def is_quote_list(node):
-            "Quoteì˜ nextê°€ listì¸ì§€ í™•ì¸"
+            "QuoteÀÇ next°¡ listÀÎÁö È®ÀÎ"
             if node.type is TokenType.LIST:
                 if node.value.type is TokenType.QUOTE:
                     if node.value.next.type is TokenType.LIST:
@@ -375,25 +379,28 @@ class CuteInterpreter(object):
             return False
 
         def pop_node_from_quote_list(node):
-            "Quote listì—ì„œ quoteì— ì—°ê²°ë˜ì–´ ìˆëŠ” listë…¸ë“œì˜ valueë¥¼ êº¼ë‚´ì¤Œ"
+            "Quote list¿¡¼­ quote¿¡ ¿¬°áµÇ¾î ÀÖ´Â list³ëµåÀÇ value¸¦ ²¨³»ÁÜ"
             if not is_quote_list(node):
                 return node
+
             return node.value.next.value
 
         def insertTable(id,value) :
             my_dict[id] = value
 
         def list_is_null(node):
-            "ì…ë ¥ë°›ì€ nodeê°€ null listì¸ì§€ í™•ì¸í•¨"
+            "ÀÔ·Â¹ŞÀº node°¡ null listÀÎÁö È®ÀÎÇÔ"
             node = pop_node_from_quote_list(node)
-            if node is None:return True
+            if node is None:
+                return True
             return False
 
        	if func_node.type is TokenType.CAR:
             rhs1 = self.run_expr(rhs1)
             if not is_quote_list(rhs1):
                 print ("car error!")
-            result = pop_node_from_quote_list(rhs1)
+
+            result = pop_node_from_quote_list(rhs1) #value
             if result.type is not TokenType.LIST:
                 return result
             return create_quote_node(result)
@@ -403,9 +410,9 @@ class CuteInterpreter(object):
             rhs1 = self.run_expr(rhs1)
             if not is_quote_list(rhs1):
                 print("cdr error!")
-
             result = pop_node_from_quote_list(rhs1)
             q_node = Node(TokenType.LIST, result.next)
+
             return create_quote_node(q_node)
 
 
@@ -440,7 +447,8 @@ class CuteInterpreter(object):
 
 
         elif func_node.type is TokenType.NULL_Q:
-            if list_is_null(rhs1): return self.TRUE_NODE
+            if list_is_null(self.run_expr(rhs1)):
+                return self.TRUE_NODE
             return self.FALSE_NODE
 
         elif func_node.type is TokenType.GT:
@@ -488,9 +496,35 @@ class CuteInterpreter(object):
             expr_rhs2 = self.run_expr(rhs2)
             insertTable(rhs1.value,expr_rhs2)
 
+
+        elif func_node.type is TokenType.LAMBDA :
+            global lambda_check
+            lambda_check = True
+            global lambda_argument
+
+            if len(lambda_argument) is 0 :
+                lambda_argument.append(rhs1) # º¯¼ö ¹ÙÀÎµùÀÇ ¸®½ºÆ® Á¦¿ÜÇÑ ³ëµåºÎºĞ¸¸ ¾îÆæµå #ÆÄ¶ó¹ÌÅÍ ÀúÀå
+
+            while 1:
+                expr_rhs2 = self.run_expr(rhs2)
+                if rhs2.next is None:
+                    break
+                else:
+                    rhs2 = rhs2.next
+
+            return expr_rhs2
+
         else:
             return None
 
+    def search(self, head_node, var_node, varName) :
+        if head_node is not None :
+            if head_node.value == varName :
+                return var_node
+            else:
+                return self.search(head_node.next, var_node.next, varName)
+        else:
+            return None
 
     def run_expr(self, root_node):
         """
@@ -500,12 +534,22 @@ class CuteInterpreter(object):
             return None
 
         if root_node.type is TokenType.ID:
-            dict_value = self.lookupTable(root_node.value)
-            if dict_value is None:
-                sys.stdout.write(root_node.value + ": undefined;\n cannot reference undefined identifier")
-                return None
-            else:
-                return dict_value
+            global lambda_check
+            if lambda_check is True :
+
+                return self.search(lambda_argument[0].value, lambda_actual_parameter[lambda_actual_parameter.__len__()-1], root_node.value)
+
+            else :
+                dict_value = self.lookupTable(root_node.value)
+                if dict_value is None:
+                    sys.stdout.write(root_node.value + ": undefined;\n cannot reference undefined identifier")
+                    return None
+                else:
+                    if dict_value.type is TokenType.INT :
+                        return dict_value
+                    elif dict_value.value.type is TokenType.LAMBDA :
+                        sys.stdout.write( "<#procedure:"+root_node.value+">" )
+                        return
 
         elif root_node.type is TokenType.INT:
             return root_node
@@ -535,8 +579,23 @@ class CuteInterpreter(object):
                 [TokenType.PLUS, TokenType.MINUS, TokenType.TIMES, \
                  TokenType.DIV]:
             return self.run_arith(op_code)
-        if op_code.type is TokenType.QUOTE:
+        if op_code.type is TokenType.QUOTE or op_code.type is TokenType.LAMBDA:
             return l_node
+
+        getFunction = self.lookupTable(op_code.value)
+
+        # Does the function exist on table?
+        if getFunction is not None:
+            global lambda_actual_parameter, lambda_check
+            # If nothing on table
+            if len(lambda_actual_parameter) is 0 :
+                lambda_actual_parameter.append(op_code.next)
+
+            else:
+                save =self.run_expr(op_code.next)
+                lambda_actual_parameter.append(save)
+
+            return self.run_func(getFunction.value)
         else:
             print "application: not a procedure;"
             print "expected a procedure that can be applied to arguments"
@@ -547,14 +606,13 @@ class CuteInterpreter(object):
 
 def print_node(node):
     """
-    "Evaluation í›„ ê²°ê³¼ë¥¼ ì¶œë ¥í•˜ê¸° ìœ„í•œ í•¨ìˆ˜"
-    "ì…ë ¥ì€ List Node ë˜ëŠ” atom"
+    "Get result and print after evaluation"
+    "Input type: List Node or atom"
     :type node: Node
     """
     def print_list(node):
         """
-        "Listë…¸ë“œì˜ valueì— ëŒ€í•´ì„œ ì¶œë ¥"
-        "( 2 3 )ì´ ì…ë ¥ì´ë©´ 2ì™€ 3ì— ëŒ€í•´ì„œ ëª¨ë‘ ì¶œë ¥í•¨"
+        "Print value of List node."
         :type node: Node
         """
         def print_list_val(node):
@@ -613,22 +671,45 @@ def print_node(node):
         return "'"+print_node(node.next)
 
 def Test_method(input):
+    global lambda_check, lambda_actual_parameter, lambda_argument
     test_cute = CuteScanner(input)
     test_tokens=test_cute.tokenize()
     test_basic_paser = BasicPaser(test_tokens)
     node = test_basic_paser.parse_expr()
     cute_inter = CuteInterpreter()
     result = cute_inter.run_expr(node)
+    lambda_check = False
+    lambda_actual_parameter = []
+    lambda_argument = []
     print print_node(result)
 
 def run_main():
     print 'Cute Interpreter'
+
     while True:
-        inputString = raw_input('> ')
-        if inputString is None:
-            break
-        else:
-            sys.stdout.write('..')
-            Test_method(inputString)
+       inputString = raw_input('> ')
+       if inputString is None:
+           break
+       else:
+           sys.stdout.write('..')
+           Test_method(inputString)
+
+  #  Test_method("( define plus1 ( lambda ( x ) ( + x 1 ) ) )")
+  #  Test_method("( plus1 3 )")
+  #  Test_method("( define plus2 ( lambda ( x ) ( + ( plus1 x ) 1 ) ) )")
+  #  Test_method("( plus2 9 )")
+  #  Test_method("( define cube ( lambda ( n ) ( define sqrt ( lambda ( n ) ( * n n ) ) ) ( * ( sqrt n ) n ) ) )")
+  #  Test_method("( define foo ( lambda ( x y ) ( define goo ( lambda ( x ) ( * 2 x ) ) ) ( * ( goo x ) y ) ) ) ")
+  #  Test_method("( cube 5 )")
+  #  Test_method("( foo 5 3 )")
+  #  Test_method("( define quadra ( lambda ( n ) ( define cube ( lambda ( n ) ( define sqrt ( lambda ( n ) ( * n n ) ) ) ( * ( sqrt n ) n ) ) ) ( * ( cube n ) n ) ) )")
+  #  Test_method("( quadra 5 )")
+  #  Test_method("( define lastitem ( lambda ( ls ) ( cond ( ( null? ( cdr ls ) ) ( car ls ) ) ( #T ( lastitem ( cdr ls ) ) ) ) ) )")
+  #  Test_method("( lastitem ' ( 1 2 3 ) )")
+  #  Test_method("lastitem")
+  #  Test_method("cube")
+  #  Test_method("( define length ( lambda ( ls ) ( cond ( ( null? ls ) 0 ) ( #T ( + 1 ( length ( cdr ls ) ) ) ) ) ) )")
+  #  Test_method("( length ' ( 1 2 3 ) )")
 
 run_main()
+
