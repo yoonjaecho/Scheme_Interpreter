@@ -355,12 +355,6 @@ class CuteInterpreter(object):
         rhs2 = rhs1.next if rhs1.next is not None else None
 
         def create_quote_node(node, list_flag = False):
-            """
-            "Quote ��带 ������ ��, node�� next�� �Ͽ� ��ȯ"
-            "list_flag�� True�� ���, list node�� ������ ��, list�� value�� �Է¹��� node�� �����ϰ�"
-            "Quote�� next�� ���⼭ ������ list�� ������"
-            "���� ������ ���⼭ ������ quote��带 value�� ���� List"
-            """
             q_node = Node(TokenType.QUOTE)
             if list_flag:
                 inner_l_node = Node(TokenType.LIST, node)
@@ -371,7 +365,6 @@ class CuteInterpreter(object):
             return l_node
 
         def is_quote_list(node):
-            "Quote�� next�� list���� Ȯ��"
             if node.type is TokenType.LIST:
                 if node.value.type is TokenType.QUOTE:
                     if node.value.next.type is TokenType.LIST:
@@ -379,7 +372,6 @@ class CuteInterpreter(object):
             return False
 
         def pop_node_from_quote_list(node):
-            "Quote list���� quote�� ����Ǿ� �ִ� list����� value�� ������"
             if not is_quote_list(node):
                 return node
 
@@ -389,7 +381,6 @@ class CuteInterpreter(object):
             my_dict[id] = value
 
         def list_is_null(node):
-            "�Է¹��� node�� null list���� Ȯ����"
             node = pop_node_from_quote_list(node)
             if node is None:
                 return True
@@ -503,7 +494,7 @@ class CuteInterpreter(object):
             global lambda_argument
 
             if len(lambda_argument) is 0 :
-                lambda_argument.append(rhs1) # ���� ���ε��� ����Ʈ ������ ���κи� ����� #�Ķ���� ����
+                lambda_argument.append(rhs1)
 
             while 1:
                 expr_rhs2 = self.run_expr(rhs2)
