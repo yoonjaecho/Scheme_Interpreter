@@ -411,8 +411,9 @@ class CuteInterpreter(object):
             if not is_quote_list(rhs1):
                 print("cdr error!")
             result = pop_node_from_quote_list(rhs1)
-            q_node = Node(TokenType.LIST, result.next)
-
+            if result.next is not None :
+                q_node = Node(TokenType.LIST, result.next)
+            else : q_node = Node(TokenType.LIST)
             return create_quote_node(q_node)
 
 
@@ -535,14 +536,25 @@ class CuteInterpreter(object):
 
         if root_node.type is TokenType.ID:
             global lambda_check
+            # temp = self.lookupTable(root_node.value)
+            # if temp is not None :
+            #     return temp
+
             if lambda_check is True :
+                check_node_variable = self.lookupTable(root_node.value)
                 i = 0
                 while True :
+                    # print "lambda_argument(%d) : " % i,lambda_argument[i]
+                    # print "lambda_actual_parameter(%d) : " % i,lambda_actual_parameter[i]
                     flag = self.search(lambda_argument[i].value, lambda_actual_parameter[i], root_node.value)
-                    if flag is not None :
+                    if check_node_variable is not None :
+                            return check_node_variable
+                    elif flag is not None :
                         return flag
                     else :
                         i += 1
+
+
 
             else :
                 dict_value = self.lookupTable(root_node.value)
@@ -600,7 +612,9 @@ class CuteInterpreter(object):
                 lambda_actual_parameter.append(op_code.next)
 
             else:
-                save =self.run_expr(op_code.next)
+                # print "before : ",op_code.next
+                save = self.run_expr(op_code.next)
+                # print "save : ",save
                 lambda_actual_parameter[lambda_actual_parameter.__len__()-1] =save
 
             return self.run_func(getFunction.value)
@@ -694,32 +708,42 @@ def Test_method(input):
 def run_main():
     print 'Cute Interpreter'
 
-    # while True:
-    #    inputString = raw_input('> ')
-    #    if inputString is None:
-    #        break
-    #    else:
-    #        sys.stdout.write('..')
-    #        Test_method(inputString)
+    while True:
+       inputString = raw_input('> ')
+       if inputString is None:
+           break
+       else:
+           sys.stdout.write('..')
+           Test_method(inputString)
 
-    Test_method("( ( lambda ( x ) ( + x 1 ) ) 100 )")
-    Test_method("( ( lambda ( x ) ( + x ( ( lambda ( y ) ( + y 1 ) ) 1 ) ) ) 1 )")
-    Test_method("( define plus1 ( lambda ( x ) ( + x 1 ) ) )")
-    Test_method("( plus1 3 )")
-    Test_method("( define plus2 ( lambda ( x ) ( + ( plus1 x ) 1 ) ) )")
-    Test_method("( plus2 9 )")
-    Test_method("( define cube ( lambda ( n ) ( define sqrt ( lambda ( n ) ( * n n ) ) ) ( * ( sqrt n ) n ) ) )")
-    Test_method("( define foo ( lambda ( x y ) ( define goo ( lambda ( x ) ( * 2 x ) ) ) ( * ( goo x ) y ) ) ) ")
-    Test_method("( cube 5 )")
-    Test_method("( foo 5 3 )")
-    Test_method("( define quadra ( lambda ( n ) ( define cube ( lambda ( n ) ( define sqrt ( lambda ( n ) ( * n n ) ) ) ( * ( sqrt n ) n ) ) ) ( * ( cube n ) n ) ) )")
-    Test_method("( quadra 5 )")
-    Test_method("( define lastitem ( lambda ( ls ) ( cond ( ( null? ( cdr ls ) ) ( car ls ) ) ( #T ( lastitem ( cdr ls ) ) ) ) ) )")
-    Test_method("( lastitem ' ( 1 2 3 ) )")
-    Test_method("lastitem")
-    Test_method("cube")
-    Test_method("( define length ( lambda ( ls ) ( cond ( ( null? ls ) 0 ) ( #T ( + 1 ( length ( cdr ls ) ) ) ) ) ) )")
-    Test_method("( length ' ( 1 2 3 4 5 ) )")
+    # Test_method("( ( lambda ( x ) ( + x 1 ) ) 100 )")
+    # Test_method("( ( lambda ( x ) ( + x ( ( lambda ( y ) ( + y 1 ) ) 1 ) ) ) 1 )")
+    # Test_method("( define plus1 ( lambda ( x ) ( + x 1 ) ) )")
+    # Test_method("( plus1 3 )")
+    # Test_method("( define plus2 ( lambda ( x ) ( + ( plus1 x ) 1 ) ) )")
+    # Test_method("( plus2 9 )")
+    # Test_method("( define cube ( lambda ( n ) ( define sqrt ( lambda ( n ) ( * n n ) ) ) ( * ( sqrt n ) n ) ) )")
+    # Test_method("( define foo ( lambda ( x y ) ( define goo ( lambda ( x ) ( * 2 x ) ) ) ( * ( goo x ) y ) ) ) ")
+    # Test_method("( cube 5 )")
+    # Test_method("( foo 5 3 )")
+    # Test_method("( define quadra ( lambda ( n ) ( define cube ( lambda ( n ) ( define sqrt ( lambda ( n ) ( * n n ) ) ) ( * ( sqrt n ) n ) ) ) ( * ( cube n ) n ) ) )")
+    # Test_method("( quadra 5 )")
+    # Test_method("( define lastitem ( lambda ( ls ) ( cond ( ( null? ( cdr ls ) ) ( car ls ) ) ( #T ( lastitem ( cdr ls ) ) ) ) ) )")
+    # Test_method("( lastitem ' ( 1 2 3 ) )")
+    # Test_method("lastitem")
+    # Test_method("cube")
+    # Test_method("( define length ( lambda ( ls ) ( cond ( ( null? ls ) 0 ) ( #T ( + 1 ( length ( cdr ls ) ) ) ) ) ) )")
+    # Test_method("( length ' ( 1 2 3 4 5 ) )")
+    # Test_method("( ( lambda ( a b ) ( + a b ) ) 24 5 )")
+    # Test_method("( define a ( + 1 2 ) )")
+    # Test_method("a")
+    # Test_method("( define fact ( lambda ( n ) ( cond ( ( = n 0 ) 1 ) ( #T ( * n ( fact ( - n 1 ) ) ) ) ) ) )")
+    # Test_method("( fact 3 )")
+    # Test_method("( define plus1 ( lambda ( x ) ( + x 1 ) ) )")
+    # Test_method("( plus1 3 )")
+    # Test_method("( define x 1 )")
+    # Test_method("( plus1 x )")
+
 
 run_main()
 
