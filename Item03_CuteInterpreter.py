@@ -5,6 +5,7 @@ from string import letters, digits
 my_dict = {}
 lambda_argument = []
 lambda_actual_parameter = []
+lambda_inner_define = {}
 lambda_check = False
 
 class CuteType:
@@ -494,20 +495,28 @@ class CuteInterpreter(object):
             return None
 
         elif func_node.type is TokenType.DEFINE :
+            global lambda_check, lambda_inner_define
             expr_rhs2 = self.run_expr(rhs2)
-            insertTable(rhs1.value,expr_rhs2)
+
+            # if lambda_check ->  add local function
+            if lambda_check :
+                lambda_inner_define[rhs1.value] = expr_rhs2
+            else :
+                insertTable(rhs1.value,expr_rhs2)
 
 
         elif func_node.type is TokenType.LAMBDA :
-            global lambda_check
-            lambda_check = True
-            global lambda_argument
+            #global lambda_check,lambda_argument,lambda_inner_define
+            #lambda_check = True
 
             #if len(lambda_argument) is 0 :
+            lambda_check = True
+
             lambda_argument.append(rhs1) # ���� ���ε��� ����Ʈ ������ ���κи� ����� #�Ķ���� ����
 
             while 1:
                 expr_rhs2 = self.run_expr(rhs2)
+
                 if rhs2.next is None:
                     break
                 else:
@@ -548,12 +557,11 @@ class CuteInterpreter(object):
                     # print "lambda_actual_parameter(%d) : " % i,lambda_actual_parameter[i]
                     flag = self.search(lambda_argument[i].value, lambda_actual_parameter[i], root_node.value)
                     if check_node_variable is not None :
-                            return check_node_variable
+                        return check_node_variable
                     elif flag is not None :
                         return flag
                     else :
                         i += 1
-
 
 
             else :
@@ -584,7 +592,7 @@ class CuteInterpreter(object):
         """
         :type l_node:Node
         """
-        global lambda_actual_parameter, lambda_check
+        global lambda_actual_parameter, lambda_check, lambda_inner_define
         op_code = l_node.value
         if op_code is None:
             return l_node
@@ -603,7 +611,12 @@ class CuteInterpreter(object):
             lambda_actual_parameter.append(op_code.next)
             return self.run_func(op_code.value)
 
-        getFunction = self.lookupTable(op_code.value)
+        #first local check
+        local_check = lambda_inner_define.get(op_code.value)
+        if local_check :
+            getFunction = local_check
+        else:
+            getFunction = self.lookupTable(op_code.value)
 
         # Does the function exist on table?
         if getFunction is not None:
@@ -693,7 +706,7 @@ def print_node(node):
         return "'"+print_node(node.next)
 
 def Test_method(input):
-    global lambda_check, lambda_actual_parameter, lambda_argument
+    global lambda_check, lambda_actual_parameter, lambda_argument, lambda_inner_define
     test_cute = CuteScanner(input)
     test_tokens=test_cute.tokenize()
     test_basic_paser = BasicPaser(test_tokens)
@@ -703,6 +716,7 @@ def Test_method(input):
     lambda_check = False
     lambda_actual_parameter = []
     lambda_argument = []
+    lambda_inner_define = {}
     print print_node(result)
 
 def run_main():
