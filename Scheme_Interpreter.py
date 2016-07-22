@@ -2,6 +2,12 @@
 import sys
 from string import letters, digits
 
+my_dict = {}
+lambda_argument = []
+lambda_actual_parameter = []
+lambda_inner_define = {}
+lambda_check = False
+
 class CuteType:
     INT=1
     ID=4
@@ -318,6 +324,13 @@ class CuteInterpreter(object):
 
     TRUE_NODE = Node(TokenType.TRUE)
     FALSE_NODE = Node(TokenType.FALSE)
+    #lambda_check = False
+
+    def lookupTable(self, id):
+        if id in my_dict:
+            return my_dict[id]
+        else:
+            return None
 
     def run_arith(self, arith_node):
         rhs1 = arith_node.next
@@ -335,7 +348,7 @@ class CuteInterpreter(object):
            result.value = int(left.value) * int(right.value)
         elif arith_node.type is TokenType.DIV:
            result.value = int(left.value) / int(right.value)
-    
+
         return result
 
     def run_func(self, func_node):
@@ -344,10 +357,10 @@ class CuteInterpreter(object):
 
         def create_quote_node(node, list_flag = False):
             """
-            "Quote 노드를 생성한 뒤, node를 next로 하여 반환"
-            "list_flag가 True일 경우, list node를 생성한 뒤, list의 value를 입력받은 node로 연결하고"
-            "Quote의 next를 여기서 생상한 list로 연결함"
-            "최종 리턴은 여기서 생성한 quote노드를 value로 갖는 List"
+            "Quote ���?������ ��, node�� next�� �Ͽ� ��ȯ"
+            "list_flag�� True�� ���? list node�� ������ ��, list�� value�� �Է¹��� node�� �����ϰ�"
+            "Quote�� next�� ���⼭ ������ list�� ������"
+            "���� ������ ���⼭ ������ quote���?value�� ���� List"
             """
             q_node = Node(TokenType.QUOTE)
             if list_flag:
@@ -359,7 +372,7 @@ class CuteInterpreter(object):
             return l_node
 
         def is_quote_list(node):
-            "Quote의 next가 list인지 확인"
+            "Quote�� next�� list���� Ȯ��"
             if node.type is TokenType.LIST:
                 if node.value.type is TokenType.QUOTE:
                     if node.value.next.type is TokenType.LIST:
@@ -367,22 +380,28 @@ class CuteInterpreter(object):
             return False
 
         def pop_node_from_quote_list(node):
-            "Quote list에서 quote에 연결되어 있는 list노드의 value를 꺼내줌"
+            "Quote list���� quote�� ����Ǿ�?�ִ� list�����?value�� ������"
             if not is_quote_list(node):
                 return node
+
             return node.value.next.value
 
+        def insertTable(id,value) :
+            my_dict[id] = value
+
         def list_is_null(node):
-            "입력받은 node가 null list인지 확인함"
+            "�Է¹��� node�� null list���� Ȯ����"
             node = pop_node_from_quote_list(node)
-            if node is None:return True
+            if node is None:
+                return True
             return False
 
-        if func_node.type is TokenType.CAR:
+       	if func_node.type is TokenType.CAR:
             rhs1 = self.run_expr(rhs1)
             if not is_quote_list(rhs1):
                 print ("car error!")
-            result = pop_node_from_quote_list(rhs1)
+
+            result = pop_node_from_quote_list(rhs1) #value
             if result.type is not TokenType.LIST:
                 return result
             return create_quote_node(result)
@@ -392,16 +411,17 @@ class CuteInterpreter(object):
             rhs1 = self.run_expr(rhs1)
             if not is_quote_list(rhs1):
                 print("cdr error!")
-           
             result = pop_node_from_quote_list(rhs1)
-            q_node = Node(TokenType.LIST, result.next)
+            if result.next is not None :
+                q_node = Node(TokenType.LIST, result.next)
+            else : q_node = Node(TokenType.LIST)
             return create_quote_node(q_node)
 
 
         elif func_node.type is TokenType.CONS:
             expr_rhs1 = self.run_expr(rhs1)
             expr_rhs2 = self.run_expr(rhs2)
-            
+
             if is_quote_list(expr_rhs1):
                 head = Node(TokenType.LIST, pop_node_from_quote_list(expr_rhs1))
             else:
@@ -425,32 +445,33 @@ class CuteInterpreter(object):
             if rhs1.type is TokenType.INT:
                 if rhs1.value is rhs2.value:
                     return self.TRUE_NODE
-            return self.FALSE_NODE 
+            return self.FALSE_NODE
 
 
         elif func_node.type is TokenType.NULL_Q:
-            if list_is_null(rhs1): return self.TRUE_NODE
+            if list_is_null(self.run_expr(rhs1)):
+                return self.TRUE_NODE
             return self.FALSE_NODE
 
         elif func_node.type is TokenType.GT:
-            expr_rhs1 = self.run_expr(rhs1) 
-            expr_rhs2 = self.run_expr(rhs2) 
+            expr_rhs1 = self.run_expr(rhs1)
+            expr_rhs2 = self.run_expr(rhs2)
             if int(expr_rhs1.value) > int(expr_rhs2.value):
                 return self.TRUE_NODE
             else:
                 return self.FALSE_NODE
 
         elif func_node.type is TokenType.LT:
-            expr_rhs1 = self.run_expr(rhs1) 
-            expr_rhs2 = self.run_expr(rhs2) 
+            expr_rhs1 = self.run_expr(rhs1)
+            expr_rhs2 = self.run_expr(rhs2)
             if int(expr_rhs1.value) < int(expr_rhs2.value):
                 return self.TRUE_NODE
             else:
                 return self.FALSE_NODE
 
         elif func_node.type is TokenType.EQ:
-            expr_rhs1 = self.run_expr(rhs1) 
-            expr_rhs2 = self.run_expr(rhs2) 
+            expr_rhs1 = self.run_expr(rhs1)
+            expr_rhs2 = self.run_expr(rhs2)
             if int(expr_rhs1.value) == int(expr_rhs2.value):
                 return self.TRUE_NODE
             else:
@@ -462,7 +483,7 @@ class CuteInterpreter(object):
                 return self.TRUE_NODE
             elif str(expr_rhs1) == str(self.TRUE_NODE):
                 return self.FALSE_NODE
-        
+
         elif func_node.type is TokenType.COND:
             while rhs1 is not None:
                 condition = rhs1.value
@@ -472,10 +493,48 @@ class CuteInterpreter(object):
                 else:
                     rhs1 = rhs1.next
             return None
-                
+
+        elif func_node.type is TokenType.DEFINE :
+            global lambda_check, lambda_inner_define
+            expr_rhs2 = self.run_expr(rhs2)
+
+            # if lambda_check ->  add local function
+            if lambda_check :
+                lambda_inner_define[rhs1.value] = expr_rhs2
+            else :
+                insertTable(rhs1.value,expr_rhs2)
+
+
+        elif func_node.type is TokenType.LAMBDA :
+            #global lambda_check,lambda_argument,lambda_inner_define
+            #lambda_check = True
+
+            #if len(lambda_argument) is 0 :
+            lambda_check = True
+
+            lambda_argument.append(rhs1) # ���� ���ε��� ����Ʈ ������ ���κи� �����?#�Ķ����?����
+
+            while 1:
+                expr_rhs2 = self.run_expr(rhs2)
+
+                if rhs2.next is None:
+                    break
+                else:
+                    rhs2 = rhs2.next
+
+            return expr_rhs2
+
         else:
             return None
 
+    def search(self, head_node, var_node, varName) :
+        if head_node is not None :
+            if head_node.value == varName :
+                return var_node
+            else:
+                return self.search(head_node.next, var_node.next, varName)
+        else:
+            return None
 
     def run_expr(self, root_node):
         """
@@ -485,7 +544,38 @@ class CuteInterpreter(object):
             return None
 
         if root_node.type is TokenType.ID:
-            return root_node
+            global lambda_check
+            # temp = self.lookupTable(root_node.value)
+            # if temp is not None :
+            #     return temp
+
+            if lambda_check is True :
+                check_node_variable = self.lookupTable(root_node.value)
+                i = 0
+                while True :
+                    # print "lambda_argument(%d) : " % i,lambda_argument[i]
+                    # print "lambda_actual_parameter(%d) : " % i,lambda_actual_parameter[i]
+                    flag = self.search(lambda_argument[i].value, lambda_actual_parameter[i], root_node.value)
+                    if check_node_variable is not None :
+                        return check_node_variable
+                    elif flag is not None :
+                        return flag
+                    else :
+                        i += 1
+
+
+            else :
+                dict_value = self.lookupTable(root_node.value)
+                if dict_value is None:
+                    sys.stdout.write(root_node.value + ": undefined;\n cannot reference undefined identifier")
+                    return None
+                else:
+                    if dict_value.type is TokenType.INT :
+                        return dict_value
+                    elif dict_value.value.type is TokenType.LAMBDA :
+                        sys.stdout.write( "<#procedure:"+root_node.value+">" )
+                        return
+
         elif root_node.type is TokenType.INT:
             return root_node
         elif root_node.type is TokenType.TRUE:
@@ -502,20 +592,45 @@ class CuteInterpreter(object):
         """
         :type l_node:Node
         """
+        global lambda_actual_parameter, lambda_check, lambda_inner_define
         op_code = l_node.value
         if op_code is None:
             return l_node
         if op_code.type in \
                 [TokenType.CAR, TokenType.CDR, TokenType.CONS, TokenType.ATOM_Q,\
                  TokenType.EQ_Q, TokenType.NULL_Q, TokenType.NOT, \
-                 TokenType.GT, TokenType.LT, TokenType.EQ, TokenType.COND]:
+                 TokenType.GT, TokenType.LT, TokenType.EQ, TokenType.COND, TokenType.DEFINE]:
             return self.run_func(op_code)
         if op_code.type in \
                 [TokenType.PLUS, TokenType.MINUS, TokenType.TIMES, \
                  TokenType.DIV]:
             return self.run_arith(op_code)
-        if op_code.type is TokenType.QUOTE:
+        if op_code.type is TokenType.QUOTE or op_code.type is TokenType.LAMBDA:
             return l_node
+        if op_code.type is TokenType.LIST :
+            lambda_actual_parameter.append(op_code.next)
+            return self.run_func(op_code.value)
+
+        #first local check
+        local_check = lambda_inner_define.get(op_code.value)
+        if local_check :
+            getFunction = local_check
+        else:
+            getFunction = self.lookupTable(op_code.value)
+
+        # Does the function exist on table?
+        if getFunction is not None:
+            # If nothing on table
+            if len(lambda_actual_parameter) is 0 :
+                lambda_actual_parameter.append(op_code.next)
+
+            else:
+                # print "before : ",op_code.next
+                save = self.run_expr(op_code.next)
+                # print "save : ",save
+                lambda_actual_parameter[lambda_actual_parameter.__len__()-1] =save
+
+            return self.run_func(getFunction.value)
         else:
             print "application: not a procedure;"
             print "expected a procedure that can be applied to arguments"
@@ -526,14 +641,13 @@ class CuteInterpreter(object):
 
 def print_node(node):
     """
-    "Evaluation 후 결과를 출력하기 위한 함수"
-    "입력은 List Node 또는 atom"
+    "Get result and print after evaluation"
+    "Input type: List Node or atom"
     :type node: Node
     """
     def print_list(node):
         """
-        "List노드의 value에 대해서 출력"
-        "( 2 3 )이 입력이면 2와 3에 대해서 모두 출력함"
+        "Print value of List node."
         :type node: Node
         """
         def print_list_val(node):
@@ -592,22 +706,29 @@ def print_node(node):
         return "'"+print_node(node.next)
 
 def Test_method(input):
+    global lambda_check, lambda_actual_parameter, lambda_argument, lambda_inner_define
     test_cute = CuteScanner(input)
     test_tokens=test_cute.tokenize()
     test_basic_paser = BasicPaser(test_tokens)
     node = test_basic_paser.parse_expr()
     cute_inter = CuteInterpreter()
     result = cute_inter.run_expr(node)
+    lambda_check = False
+    lambda_actual_parameter = []
+    lambda_argument = []
+    lambda_inner_define = {}
     print print_node(result)
 
 def run_main():
     print 'Cute Interpreter'
+
     while True:
-        inputString = raw_input('> ')
-        if inputString is None:
-            break
-        else:
-            sys.stdout.write('..')
-            Test_method(inputString)
-        
+       inputString = raw_input('> ')
+       if inputString is None:
+           break
+       else:
+           sys.stdout.write('..')
+           Test_method(inputString)
+
 run_main()
+
