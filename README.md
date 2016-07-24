@@ -1,6 +1,6 @@
 # Scheme_Interpreter
 
-Scheme Interpreter with python following Cute16 grammar.
+Scheme Interpreter in python following Cute16 grammar.
 
 ## How to use ?
 
